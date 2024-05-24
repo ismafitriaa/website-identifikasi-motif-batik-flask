@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Klasifikasi Batik</title>
+
+    <!-- CSS FILES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&display=swap"
+        rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/templatemo-topic-listing.css') }}" rel="stylesheet">
+    <!--
+
+TemplateMo 590 topic listing
+
+https://templatemo.com/tm-590-topic-listing
+
+-->
+</head>
+
+<body id="top">
+
+    <main>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img src="static\images\logo_batik.png" alt="Logo Batik" class="logo">
+                    <span style="color:#A3720F; font-family: cursive">Batik Finder</span>
+                </a>
+                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll" href="#section_1">Klasifikasi</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll" href="#section_2">Informasi Batik</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link click-scroll" href="#section_3">Tentang Sistem</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <section class="hero-section d-flex justify-content-center align-items-center" id="section_1">
+            <div class="section-overlay"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-12 mx-auto">
+                        <h1 class="text-center" style="color:#d8c78d">Pengenalan Motif Batik</h1>
+                        <h6 class="text-center" style="color:#ffffff">Masukkan gambar yang akan diidentifikasi</h6>
+                        <form action="/upload" method="post" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <input type="file" id="classifyButton" name="gambar" accept="image/*">
+                                <button type="submit">Unggah</button>
+                            </div>
+                        </form>
+                        {% if motif %}
+                        <div class="result-container">
+                            <h2 class="text-center" style="color:#d8c78d">Hasil Klasifikasi</h2>
+                            <p class="text-center" style="color:#ffffff">Motif Batik: {{ motif }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+
+        <section class="explore-section section-padding" id="section_2">
+            <div class="container">
+                <div class="col-12 text-center">
+                    <h2 class="mb-4" style="color:#d8c78d">Informasi Batik</h2>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <form method="get" class="search-container">
+                    <div class="input-group">
+                        <input type="text" name="keyword" id="searchInput" placeholder="Ketikan nama motif...">
+                        <button type="submit" id="searchButton">Cari</button>
+                    </div>
+                </form>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="tab-content" id="myTabContent">
+                            <div class="row">
+                                {% for rs in data %}
+                                {% if loop.index <= 6 %}
+                                <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-3">
+                                    <div class="custom-block bg-white shadow-lg">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <div>
+                                                <h5 class="batikTitle text-center mb-4">{{ rs[1] }}</h5>
+                                                <img src="data:image/jpeg;base64,{{ rs[2] }}" alt="Gambar Batik"
+                                                    class="batikImage"
+                                                    style="width: 200px; height: 200px; display: block; margin: 0 auto;">
+                                                <button class="btn batikButton mt-3" type="button" data-toggle="modal" data-target="#detailModal"
+                                                    data-title="{{ rs[1] }}" data-image="data:image/jpeg;base64,{{ rs[2] }}"
+                                                    data-philosophy="{{ rs[3] }}">Lihat Detail
+                                                </button>                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ page - 1 }}{% if keyword %}&keyword={{ keyword }}{% endif %}">Sebelumnya</a>
+                    </li>
+                    {% endif %}
+                    {% for page_num in range(1, total_pages + 1) %}
+                    {% if page_num <= page + 3 and page_num>= page - 3 %}
+                    <li class="page-item {% if page == page_num %}active{% endif %}">
+                        <a class="page-link"
+                            href="?page={{ page_num }}{% if keyword %}&keyword={{ keyword }}{% endif %}">{{ page_num
+                            }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if page < total_pages %} 
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ page + 1 }}{% if keyword %}&keyword={{ keyword }}{% endif %}">Selanjutnya</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </section>
+
+        <section class="faq-section section-padding-1" id="section_3">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 col-12">
+                        <h2 class="mb-4">Informasi Tentang Sistem Batik Finder</h2>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-lg-5 col-12">
+                        <img src="{{ url_for('static', filename='images/faq_graphic.jpg') }}" class="img-fluid"
+                            alt="FAQs">
+                    </div>
+                    <div class="col-lg-6 col-12 m-auto">
+                        <div class="accordion" id="accordionExample">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        Bagaimana Website Ini Bekerja?
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse show"
+                                    aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Pengguna dapat melakukan <strong>input gambar</strong> motif batik untuk
+                                        mengetahui jenis motif
+                                        batik yang
+                                        terkandung dalam gambar tersebut. Aplikasi ini memanfaatkan teknologi pengenalan
+                                        gambar untuk
+                                        menganalisis pola dan karakteristik motif batik pada gambar yang diunggah.
+                                        Dengan demikian,
+                                        pengguna dapat dengan mudah <strong>mengetahui informasi terkait dengan jenis
+                                        motif</strong>
+                                        batik yang ada,
+                                        sehingga memudahkan dalam mengenali dan memahami kekayaan seni batik Indonesia
+                                        secara lebih mendalam.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Filosofi Motif Batik
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Pengguna juga dapat melakukan pencarian untuk <strong>mengetahui
+                                            filosofi </strong> yang terkandung dalam motif batik.
+                                        Dengan fitur ini, pengguna dapat memperoleh pemahaman yang lebih mendalam
+                                        tentang makna dan nilai budaya yang tersirat dalam setiap motif batik yang ada.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-12 mt-4 mt-lg-0 ms-auto">
+                    <h6 class="site-footer-title mb-3" style="color:#A3720F">Developed by</h6>
+                    <p class="text-white d-flex mb-1">
+                        <a href="tel: 305-240-9671" class="site-footer-link">
+                            <strong>Isma Fitria Risnandari</strong>
+                        </a>
+                    </p>
+                    <p class="text-white d-flex">
+                        <a href="mailto:info@company.com" class="site-footer-link">
+                            risnandari1212@gmail.com
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalLabel">Detail Motif Batik</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img id="modalImage" src="" alt="Gambar Motif" class="img-fluid">
+                        </div>
+                        <div class="col-md-6">
+                            <h4 id="modalTitle" class="mb-3"></h4>
+                            <p id="modalPhilosophy"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.sticky.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/click-scroll.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+    <script>
+        $('#detailModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var title = button.data('title'); // Extract info from data-* attributes
+            var image = button.data('image');
+            var philosophy = button.data('philosophy');
+    
+            var modal = $(this);
+            modal.find('.modal-title').text('Detail Motif Batik: ' + title);
+            modal.find('#modalTitle').text(title);
+            modal.find('#modalImage').attr('src', image);
+            modal.find('#modalPhilosophy').text(philosophy);
+        });
+    </script>    
+
+</body>
+</html>
