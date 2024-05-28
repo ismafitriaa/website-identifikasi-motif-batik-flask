@@ -72,14 +72,18 @@ https://templatemo.com/tm-590-topic-listing
                         </form>
                         {% if motif %}
                         <div class="result-container">
-                            <h2 class="text-center" style="color:#d8c78d">Hasil Klasifikasi</h2>
+                            <h2 class="text-center" style="color:#d8c78d; font-size: 40px;">Hasil Klasifikasi</h2>
+
+                            {% if uploaded_image %}
+                            <img src="{{ uploaded_image }}" alt="Uploaded Image" style="width: 200px; height: 200px;">
+                            {% endif %}
+
                             <p class="text-center" style="color:#ffffff">Motif Batik: {{ motif }}</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
-            
         </section>
 
         <section class="explore-section section-padding" id="section_2">
@@ -89,7 +93,7 @@ https://templatemo.com/tm-590-topic-listing
                 </div>
             </div>
             <div class="container-fluid">
-                <form method="get" class="search-container">
+                <form method="get" action="/" class="search-container">
                     <div class="input-group">
                         <input type="text" name="keyword" id="searchInput" placeholder="Ketikan nama motif...">
                         <button type="submit" id="searchButton">Cari</button>
@@ -102,8 +106,7 @@ https://templatemo.com/tm-590-topic-listing
                         <div class="tab-content" id="myTabContent">
                             <div class="row">
                                 {% for rs in data %}
-                                {% if loop.index <= 6 %}
-                                <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-3">
+                                {% if loop.index <= 6 %} <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-3">
                                     <div class="custom-block bg-white shadow-lg">
                                         <div class="d-flex align-items-center justify-content-center">
                                             <div>
@@ -111,20 +114,22 @@ https://templatemo.com/tm-590-topic-listing
                                                 <img src="data:image/jpeg;base64,{{ rs[2] }}" alt="Gambar Batik"
                                                     class="batikImage"
                                                     style="width: 200px; height: 200px; display: block; margin: 0 auto;">
-                                                <button class="btn batikButton mt-3" type="button" data-toggle="modal" data-target="#detailModal"
-                                                    data-title="{{ rs[1] }}" data-image="data:image/jpeg;base64,{{ rs[2] }}"
+                                                <button class="btn batikButton mt-3" type="button"
+                                                    data-bs-toggle="modal" data-bs-target="#detailModal"
+                                                    data-title="{{ rs[1] }}"
+                                                    data-image="data:image/jpeg;base64,{{ rs[2] }}"
                                                     data-philosophy="{{ rs[3] }}">Lihat Detail
-                                                </button>                                                
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                {% endif %}
-                                {% endfor %}
-                            </div>                            
+                            </div>
+                            {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
@@ -136,19 +141,18 @@ https://templatemo.com/tm-590-topic-listing
                     {% endif %}
                     {% for page_num in range(1, total_pages + 1) %}
                     {% if page_num <= page + 3 and page_num>= page - 3 %}
-                    <li class="page-item {% if page == page_num %}active{% endif %}">
-                        <a class="page-link"
-                            href="?page={{ page_num }}{% if keyword %}&keyword={{ keyword }}{% endif %}">{{ page_num
-                            }}</a>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                    {% if page < total_pages %} 
-                    <li class="page-item">
-                        <a class="page-link"
-                            href="?page={{ page + 1 }}{% if keyword %}&keyword={{ keyword }}{% endif %}">Selanjutnya</a>
-                    </li>
-                    {% endif %}
+                        <li class="page-item {% if page == page_num %}active{% endif %}">
+                            <a class="page-link"
+                                href="?page={{ page_num }}{% if keyword %}&keyword={{ keyword }}{% endif %}">{{ page_num
+                                }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        {% if page < total_pages %} <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ page + 1 }}{% if keyword %}&keyword={{ keyword }}{% endif %}">Selanjutnya</a>
+                            </li>
+                            {% endif %}
                 </ul>
             </nav>
         </section>
@@ -184,7 +188,7 @@ https://templatemo.com/tm-590-topic-listing
                                         menganalisis pola dan karakteristik motif batik pada gambar yang diunggah.
                                         Dengan demikian,
                                         pengguna dapat dengan mudah <strong>mengetahui informasi terkait dengan jenis
-                                        motif</strong>
+                                            motif</strong>
                                         batik yang ada,
                                         sehingga memudahkan dalam mengenali dan memahami kekayaan seni batik Indonesia
                                         secara lebih mendalam.
@@ -272,14 +276,15 @@ https://templatemo.com/tm-590-topic-listing
             var title = button.data('title'); // Extract info from data-* attributes
             var image = button.data('image');
             var philosophy = button.data('philosophy');
-    
+
             var modal = $(this);
             modal.find('.modal-title').text('Detail Motif Batik: ' + title);
             modal.find('#modalTitle').text(title);
             modal.find('#modalImage').attr('src', image);
             modal.find('#modalPhilosophy').text(philosophy);
         });
-    </script>    
+    </script>
 
 </body>
+
 </html>

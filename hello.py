@@ -12,7 +12,7 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'batik'
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
 mysql = MySQL(app)
 
 # Function to calculate total pages
@@ -22,7 +22,15 @@ def calculate_total_pages(total_records, records_per_page):
 @app.route("/")
 def main():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT COUNT(*) FROM data")
+    # Get the keyword from the query string
+    keyword = request.args.get('keyword', '')
+
+    # If keyword is provided, filter the results
+    if keyword:
+        cur.execute("SELECT COUNT(*) FROM data WHERE namaBatik LIKE %s", ('%' + keyword + '%',))
+    else:
+        cur.execute("SELECT COUNT(*) FROM data")
+
     total_records = cur.fetchone()[0]
 
     page = request.args.get('page', 1, type=int)
@@ -30,7 +38,12 @@ def main():
     total_pages = calculate_total_pages(total_records, records_per_page)
     offset = (page - 1) * records_per_page
 
-    cur.execute("SELECT * FROM data LIMIT %s OFFSET %s", (records_per_page, offset))
+     # If keyword is provided, filter the results
+    if keyword:
+        cur.execute("SELECT * FROM data WHERE namaBatik LIKE %s LIMIT %s OFFSET %s", ('%' + keyword + '%', records_per_page, offset))
+    else:
+        cur.execute("SELECT * FROM data LIMIT %s OFFSET %s", (records_per_page, offset))
+
     gambar = cur.fetchall()
     cur.close()
     
@@ -40,7 +53,7 @@ def main():
         image_base64 = base64.b64encode(image_blob).decode('utf-8')
         images.append((row[0], row[1], image_base64, row[3]))
 
-    return render_template('index.html', data=images, page=page, total_pages=total_pages)
+    return render_template('index.html', data=images, page=page, total_pages=total_pages, keyword=keyword)
 
 def classify_motif(image_path, model):
     # Load and preprocess the input image
@@ -126,7 +139,27 @@ def upload():
         records_per_page = 6
         total_pages = calculate_total_pages(total_records, records_per_page)
 
-        return render_template('index.html', uploaded_image=file.filename, motif=prediction, page=page, total_pages=total_pages)
+        uploaded_image_url = '/' + file_path.replace('\\', '/')
+
+        cur.execute("SELECT COUNT(*) FROM data")
+
+        total_records = cur.fetchone()[0]
+
+        page = request.args.get('page', 1, type=int)
+        offset = (page - 1) * records_per_page
+
+        cur.execute("SELECT * FROM data LIMIT %s OFFSET %s", (records_per_page, offset))
+
+        gambar = cur.fetchall()
+        cur.close()
+        
+        images = []
+        for row in gambar:
+            image_blob = row[2]
+            image_base64 = base64.b64encode(image_blob).decode('utf-8')
+            images.append((row[0], row[1], image_base64, row[3]))
+
+        return render_template('index.html', data=images, uploaded_image=uploaded_image_url, motif=prediction, page=page, total_pages=total_pages)
         
     return redirect(url_for('main'))
 
